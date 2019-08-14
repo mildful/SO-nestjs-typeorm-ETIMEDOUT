@@ -1,13 +1,13 @@
 This repository is just a minimal reproduction case.
 
-## Step to reproduce
+## Steps to reproduce
 - clone me
 - `npm i`
 - `npm run start:dev`
-- an error related to `TypeOrmModule` appears!
+- an error related to `TypeOrmModule` appears! // should be in the next part
 
 ## What's the issue?
-This projet uses NestJS, dotenv-flow and TypeORM.
+This project uses NestJS, dotenv-flow and TypeORM.
 
 I would like to have my DB settings inside the `.env` file :
 
@@ -29,17 +29,17 @@ import * as dotenv from 'dotenv-flow';
 dotenv.config();
 ```
 
-Everything related to the env is then handled by a config service (`config/config.service.ts`). This service takes an env object as an input (using its constructor and `process.env`), validate the params using Joi and cast them if needed. Using DI, every other pieces of this app can access the current config using this service.
+Everything related to the env is then handled by a config service (`config/config.service.ts`). This service takes an env object as an input (using its constructor and `process.env`), validates the params using Joi and casts them if needed. Using DI, every other piece of this app can access to the current config using this service.
 
 This service is part of the `ConfigModule` which is imported by the `AppModule`.
 
-**And here is my issue**.
+**This is where my issue comes**.
 
-The `AppModule` also import the `TypeOrmModule`. This module takes a config object as parameter to setup the DB connection but this object relies on the `ConfigService`.
+The `AppModule` also imports the `TypeOrmModule`. This module takes a config object as parameter to setup the DB connection but this object relies on the `ConfigService`.
 
-There is a lot of discussions about this but it seems that it is now possible to use a service in the `@Module` decorator using `forRootAsync()`.
+There are a lot of discussions about this but it seems that it is now possible to use a service in the `@Module` decorator using `forRootAsync()`.
 
-So it's what I've done inside `config/database.providers.ts` :
+So this is what I did inside `config/database.providers.ts` :
 
 ```typescript
 TypeOrmModule.forRootAsync({
@@ -64,9 +64,9 @@ TypeOrmModule.forRootAsync({
 }),
 ```
 
-If I understand correctly, it should works.
+If I understand correctly, it should work.
 The debug works as expected: the service is injected and my `test` object have the right values.
 
 But those values aren't read by `@nestjs/typeorm`.
 
-I've looked for it for a long time and can't figure out whats going on.
+I've investigated the issue for a long time but I can't figure out what is going on.
